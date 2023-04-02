@@ -20,15 +20,30 @@ router.post("/", (req, res) => {
             console.log('Error in connection:- ', err)
         else {
             let db = conn.db("nodedb")
-            db.collection('products').updateOne({ p_id }, { $set: obj }, (err) => {
-                if (err)
-                    res.json({ 'update': 'Error ' + err })
-                else {
-                    console.log("Data updated")
-                    res.json({ 'update': 'success' })
-                    conn.close()
+            
+            db.collection('products').find({ p_id}).toArray(
+                (err,recodsArray)=>{
+                    if(err)
+                    console.log('Error:- ' +err)
+                    else{
+                        if(recodsArray.length >0){
+                            db.collection('products').updateOne({ p_id }, { $set: obj }, (err) => {
+                                if (err)
+                                    res.json({ 'update': 'Error ' + err })
+                                else {
+                                    console.log("Data updated")
+                                    res.json({ 'update': 'success' })
+                                    conn.close()
+                                }
+                            })
+                        }
+                        else{
+                            res.json('Record not found')
+                            conn.close()
+                        }
+                    }
                 }
-            })
+            )
         }
     })
 })
